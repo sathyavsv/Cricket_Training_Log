@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+body {
+  font-family: Arial;
+  background:#f2f4f7;
+  padding:20px;
+  color:#1f2937;
+}
+
+.box{
+  max-width: 1400px;
+  margin:auto;
+  background:#fff;
+  padding:20px 30px;
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+
+h2{text-align:center; color:#4338ca;}
+h3{margin-top: 25px; color:#4f46e5;}
+
+.top{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:20px;}
+input, select{
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  width: 100%;
+  background: #f9fafb;
+  color: #1f2937;
+}
+
+button{
+  padding: 10px 18px;
+  border:none;
+  border-radius:8px;
+  background:#4f46e5;
+  color:#fff;
+  font-weight:bold;
+  margin-right:10px;
+  cursor:pointer;
+}
+
+button.red{background:#dc2626;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.skill-label{
+  font-size: 0.85em;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.skill-desc{
+  font-size: 0.75em;
+  color: #6b7280;
+  line-height: 1.2em;
+  margin-bottom: 6px;
+}
+
+select.rating{
+  padding:6px;
+  width:100%;
+  border-radius:6px;
+  border:1px solid #cbd5e1;
+  background:#eef2ff;
+}
+
+.message{
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #4f46e5;
+  font-weight: bold;
+}
+
+/* Averages with bars */
+.averages{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:15px;
+}
+
+.avg-box{
+  flex:1;
+  background:#eef2ff;
+  border-radius:8px;
+  padding:8px 10px;
+}
+
+.avg-label{font-weight:bold; margin-bottom:4px;}
+.avg-bar{
+  width:100%;
+  height:12px;
+  border-radius:6px;
+  background:#d1d5db;
+  position:relative;
+}
+
+.avg-fill{
+  height:100%;
+  border-radius:6px;
+  width:0%;
+  background:#4f46e5;
+  transition: width 0.3s;
+}
+
+.avg-fill.bowl{background:#16a34a;}
+.avg-fill.field{background:#f97316;}
+
+/* Dashboard table */
+#dashboard{
+  display:none;
+}
+
+.scrollable{
+  overflow-x:auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top:20px;
+}
+
+th, td{
+  border:1px solid #cbd5e1;
+  padding:6px 10px;
+  text-align:center;
+  font-size:0.85em;
+}
+
+th{
+  background:#4f46e5;
+  color:#fff;
+  position: sticky;
+  top:0;
+}
+
+tr:nth-child(even){background:#f9fafb;}
+
+tr:hover{background:#e0e7ff;}
+
+/* Responsive for tablet */
+@media screen and (max-width:1024px){
+  .grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+  .top{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+  button{width:100%; margin-bottom:8px;}
+  .averages{flex-direction:column; gap:8px;}
+  .avg-box{width:100%;}
+}
+
+/* Responsive for mobile */
+@media screen and (max-width:600px){
+  body{padding:10px;}
+  h2{font-size:1.5em;}
+  h3{font-size:1.1em;}
+  .grid{grid-template-columns:1fr;}
+  input, select{font-size:0.9em; padding:6px;}
+  .avg-label{font-size:0.9em;}
+  .avg-bar{height:10px;}
+  table th, table td{font-size:0.75em; padding:4px;}
+}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Cricket Skill Tracker</h2>
+
+<!-- Toggle Buttons -->
+<div style="text-align:center;margin-bottom:15px;">
+  <button onclick="showPage('inputPage')">Player Input</button>
+  <button onclick="showPage('dashboard')">Dashboard</button>
+</div>
+
+<!-- Input Page -->
+<div id="inputPage">
+  <!-- Average Ratings -->
+  <div class="averages">
+    <div class="avg-box">
+      <div class="avg-label">Batting: <span id="avgBat">0</span></div>
+      <div class="avg-bar"><div id="avgBatBar" class="avg-fill"></div></div>
+    </div>
+    <div class="avg-box">
+      <div class="avg-label">Bowling: <span id="avgBowl">0</span></div>
+      <div class="avg-bar"><div id="avgBowlBar" class="avg-fill bowl"></div></div>
+    </div>
+    <div class="avg-box">
+      <div class="avg-label">Fielding: <span id="avgField">0</span></div>
+      <div class="avg-bar"><div id="avgFieldBar" class="avg-fill field"></div></div>
+    </div>
+  </div>
+
+  <div id="message" class="message" style="display:none;"></div>
+
+  <div class="top">
+    <select id="Name"></select>
+    <input id="NewName" placeholder="Add New Player Name">
+    <input id="Age" placeholder="Age">
+  </div>
+
+  <h3>🏏 Batting</h3>
+  <div class="grid" id="batting"></div>
+
+  <h3>🎯 Bowling</h3>
+  <div class="grid" id="bowling"></div>
+
+  <h3>🧤 Fielding</h3>
+  <div class="grid" id="fielding"></div>
+
+  <br>
+  <button onclick="save()">Save / Update</button>
+  <button onclick="load()">Load</button>
+  <button class="red" onclick="del()">Delete</button>
+</div>
+
+<!-- Dashboard Page -->
+<div id="dashboard">
+  <div class="scrollable">
+    <table id="dashboardTable">
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Skill groups
+const batting = [
+  {name:"Batting - FFD – Straight", desc:"Ability to hit straight balls with a vertical bat instead of across the line."},
+  {name:"Batting - FFD – Off", desc:"Can the kid reach outside off stump without slicing or falling away."},
+  {name:"Batting - FFD – Leg", desc:"Balance when playing on the leg side – no falling across the stumps."},
+  {name:"Batting - Back Foot Punch", desc:"Can they play short-of-length balls on the back foot, not just survive."},
+  {name:"Batting - Pull Shot", desc:"Wrist control on short balls, not wild slogging."},
+  {name:"Batting - Cut Shot", desc:"Control of late contact outside off stump."},
+  {name:"Batting - Forward Defense", desc:"Eliminating bat-pad gap and killing the ball."},
+  {name:"Batting - Back Defense", desc:"Ability to stay upright against bounce."},
+  {name:"Batting - Bat Swing Quality", desc:"Is the bat coming down straight instead of around the body."},
+  {name:"Batting - Head Position", desc:"Eyes staying over the ball during contact."},
+  {name:"Batting - Footwork Balance", desc:"Whether movement puts them in control, not falling."},
+  {name:"Batting - Timing", desc:"Contact in the middle, not speed of swing."},
+  {name:"Batting - Shot Selection", desc:"Choosing the right shot for the ball, not ego batting."}
+];
+
+const bowling = [
+  {name:"Bowling - Run-up Rhythm", desc:"Repeating the same approach every ball."},
+  {name:"Bowling - Arm Path", desc:"Bowling with a vertical, not slinging arm."},
+  {name:"Bowling - Wrist Position", desc:"Seam upright – this controls swing & accuracy."},
+  {name:"Bowling - Line Accuracy", desc:"Bowling where you plan, not spraying wides."},
+  {name:"Bowling - Length Control", desc:"Ability to land the ball in a usable area."},
+  {name:"Bowling - Speed Control", desc:"Can vary pace instead of only bowling max."},
+  {name:"Bowling - Follow-through", desc:"Energy moving through target, not stopping at crease."},
+  {name:"Bowling - No-balls", desc:"Discipline of front-foot placement."},
+  {name:"Bowling - Variation Attempt", desc:"Knowing when and why to bowl something different."}
+];
+
+const fielding = [
+  {name:"Fielding - Catching Technique", desc:"Soft hands instead of stiff grabbing."},
+  {name:"Fielding - Ground Pickup", desc:"Clean one-motion collection."},
+  {name:"Fielding - Throw Accuracy", desc:"Ability to hit a target under pressure."},
+  {name:"Fielding - Throw Speed", desc:"Flat, strong throw – not lobbing."},
+  {name:"Fielding - Reaction Time", desc:"First movement when ball is hit."},
+  {name:"Fielding - Foot Speed", desc:"Light movement to the ball."},
+  {name:"Fielding - Dive Technique", desc:"Willingness and safe technique to dive."},
+  {name:"Fielding - Positioning", desc:"Anticipating the shot before it’s played."},
+  {name:"Fielding - Communication", desc:"Calling, backing up, directing others."},
+  {name:"Fielding - Backup Running", desc:"Covering teammates instead of watching."},
+  {name:"Fielding - Boundary Awareness", desc:"Saving runs intelligently near rope."},
+  {name:"Fielding - Body Alignment", desc:"Side-on throwing and pickup posture."}
+];
+
+// Render input skills
+function renderSkills(list, elId){
+  const container = document.getElementById(elId);
+  list.forEach(s=>{
+    container.innerHTML += `
+      <div>
+        <div class="skill-label">${s.name}</div>
+        <div class="skill-desc">${s.desc}</div>
+        <select class="rating" id="${s.name}">
+          <option value="">Rate 1-5</option>
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option>
+        </select>
+      </div>`;
+  });
+}
+renderSkills(batting,"batting");
+renderSkills(bowling,"bowling");
+renderSkills(fielding,"fielding");
+
+// Show/hide pages
+function showPage(id){
+  document.getElementById("inputPage").style.display = id==="inputPage"?"block":"none";
+  document.getElementById("dashboard").style.display = id==="dashboard"?"block":"none";
+  if(id==="dashboard") loadDashboard();
+}
+
+// Messages
+function showMessage(msg){
+  const m = document.getElementById("message");
+  m.style.display="block";
+  m.textContent = msg;
+  setTimeout(()=>m.style.display="none", 4000);
+}
+
+// Dropdown names
+function refreshNames(){
+  google.script.run.withSuccessHandler(names=>{
+    const sel = document.getElementById("Name");
+    sel.innerHTML = "<option value=''>Select Player</option>";
+    names.forEach(n=>{
+      const trimmed = n.toString().trim();
+      sel.innerHTML += `<option value="${trimmed}">${trimmed}</option>`;
+    });
+  }).listNames();
+}
+refreshNames();
+
+// Update averages
+function updateAverages(){
+  function calc(list){
+    let sum=0,count=0;
+    list.forEach(s=>{
+      const v = parseInt(document.getElementById(s.name).value);
+      if(!isNaN(v)){ sum+=v; count++; }
+    });
+    return count? (sum/count).toFixed(2): "0";
+  }
+  const batAvg = calc(batting);
+  const bowlAvg = calc(bowling);
+  const fieldAvg = calc(fielding);
+
+  document.getElementById("avgBat").textContent = batAvg;
+  document.getElementById("avgBowl").textContent = bowlAvg;
+  document.getElementById("avgField").textContent = fieldAvg;
+
+  document.getElementById("avgBatBar").style.width = (batAvg/5*100)+"%";
+  document.getElementById("avgBowlBar").style.width = (bowlAvg/5*100)+"%";
+  document.getElementById("avgFieldBar").style.width = (fieldAvg/5*100)+"%";
+}
+
+// Save/Load/Delete
+function save(){
+  const name = NewName.value || Name.value;
+  if(!name) return showMessage("Name required");
+  const obj = {Name:name, Age:Age.value};
+  [...batting,...bowling,...fielding].forEach(s=>obj[s.name]=document.getElementById(s.name).value);
+  google.script.run.withSuccessHandler(msg=>{
+    showMessage(msg); refreshNames(); updateAverages();
+  }).savePlayer(obj);
+}
+
+function load(){
+  const name = Name.value.trim();
+  if(!name) return showMessage("Select player");
+  google.script.run.withSuccessHandler(p=>{
+    if(!p) return showMessage("Player not found");
+    Age.value = p.Age||"";
+    [...batting,...bowling,...fielding].forEach(s=>document.getElementById(s.name).value=p[s.name]||"");
+    updateAverages();
+  }).loadPlayer(name);
+}
+
+function del(){
+  const name = Name.value;
+  if(!name) return showMessage("Select player");
+  google.script.run.withSuccessHandler(msg=>{
+    showMessage(msg); refreshNames();
+    [...batting,...bowling,...fielding].forEach(s=>document.getElementById(s.name).value="");
+    Age.value=""; updateAverages();
+  }).deletePlayer(name);
+}
+
+// Update averages when any rating changes
+[...batting,...bowling,...fielding].forEach(s=>{
+  document.getElementById(s.name).addEventListener('change', updateAverages);
+});
+
+// Load dashboard
+function loadDashboard(){
+  google.script.run.withSuccessHandler(data=>{
+    const thead = document.getElementById("thead");
+    const tbody = document.getElementById("tbody");
+    thead.innerHTML=""; tbody.innerHTML="";
+    let headerRow = "<tr>"; data.headers.forEach(h=>headerRow+=`<th>${h}</th>`); headerRow+="</tr>";
+    thead.innerHTML = headerRow;
+    data.rows.forEach(r=>{
+      let row = "<tr>"; data.headers.forEach(h=>row+=`<td>${r[h]!==undefined?r[h]:""}</td>`); row+="</tr>";
+      tbody.innerHTML += row;
+    });
+  }).getAllPlayers();
+}
+
+</script>
+</body>
+</html>
