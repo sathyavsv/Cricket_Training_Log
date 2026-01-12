@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+body {
+  font-family: Arial;
+  background:#f2f4f7;
+  padding:20px;
+  color:#1f2937;
+}
+
+.box{
+  max-width: 1400px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+
+h2{text-align:center; color:#4338ca;}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top:20px;
+}
+
+th, td{
+  border:1px solid #cbd5e1;
+  padding:6px 10px;
+  text-align:center;
+  font-size:0.85em;
+}
+
+th{
+  background:#4f46e5;
+  color:#fff;
+  position: sticky;
+  top:0;
+}
+
+tr:nth-child(even){background:#f9fafb;}
+
+tr:hover{background:#e0e7ff;}
+
+.scrollable{
+  overflow-x:auto;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Player Dashboard</h2>
+<div class="scrollable">
+<table id="dashboardTable">
+  <thead id="thead"></thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+
+<script>
+function loadDashboard() {
+  google.script.run.withSuccessHandler(data=>{
+    const thead = document.getElementById("thead");
+    const tbody = document.getElementById("tbody");
+    thead.innerHTML="";
+    tbody.innerHTML="";
+
+    // Headers
+    let headerRow = "<tr>";
+    data.headers.forEach(h => headerRow += `<th>${h}</th>`);
+    headerRow += "</tr>";
+    thead.innerHTML = headerRow;
+
+    // Rows
+    data.rows.forEach(r=>{
+      let row = "<tr>";
+      data.headers.forEach(h=>{
+        row += `<td>${r[h]!==undefined?r[h]:""}</td>`;
+      });
+      row += "</tr>";
+      tbody.innerHTML += row;
+    });
+  }).getAllPlayers();
+}
+
+window.onload = loadDashboard;
+</script>
+</body>
+</html>
